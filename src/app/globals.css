@@ -1,26 +1,146 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #faf7f2; /* White Flour */
+  --foreground: #0c0c0c; /* Tricorn Black */
+
+  --card: #faf7f2;
+  --card-foreground: #0c0c0c;
+
+  --popover: #faf7f2;
+  --popover-foreground: #0c0c0c;
+
+  --primary: #8c3b2b; /* Roycroft Copper Red */
+  --primary-foreground: #fff9f0; /* Off-white for contrast */
+
+  --secondary: #6e7b3b; /* Saguaro */
+  --secondary-foreground: #fff9f0;
+
+  --muted: #f1eae0; /* Tinted neutral derived from White Flour */
+  --muted-foreground: #3c3c3c; /* Deep neutral (near Tricorn) */
+
+  --accent: #e2b437; /* Sunflower */
+  --accent-foreground: #0c0c0c;
+
+  --destructive: #7a2f23; /* Darker red within same family */
+  --destructive-foreground: #fff9f0;
+
+  --border: #e6ddd0; /* Soft neutral border */
+  --input: #e6ddd0;
+  --ring: #8c3b2b; /* Use primary for focus ring */
+
+  --chart-1: #8c3b2b; /* Primary family */
+  --chart-2: #e2b437; /* Accent */
+  --chart-3: #6e7b3b; /* Secondary */
+  --chart-4: #3c3c3c; /* Deep neutral */
+  --chart-5: #b86452; /* Lighter copper tint */
+
+  --radius: 0.625rem;
+
+  --sidebar: #faf7f2;
+  --sidebar-foreground: #0c0c0c;
+  --sidebar-primary: #8c3b2b;
+  --sidebar-primary-foreground: #fff9f0;
+  --sidebar-accent: #e2b437;
+  --sidebar-accent-foreground: #0c0c0c;
+  --sidebar-border: #e6ddd0;
+  --sidebar-ring: #8c3b2b;
+}
+
+.dark {
+  --background: #0c0c0c; /* Tricorn Black */
+  --foreground: #faf7f2; /* White Flour */
+
+  --card: #111111;
+  --card-foreground: #faf7f2;
+
+  --popover: #111111;
+  --popover-foreground: #faf7f2;
+
+  --primary: #e2b437; /* Use Sunflower as primary accent in dark */
+  --primary-foreground: #0c0c0c;
+
+  --secondary: #8c3b2b; /* Copper as secondary in dark */
+  --secondary-foreground: #fff9f0;
+
+  --muted: #1a1a1a;
+  --muted-foreground: #d9d2c8;
+
+  --accent: #6e7b3b; /* Saguaro */
+  --accent-foreground: #fff9f0;
+
+  --destructive: #7a2f23;
+  --destructive-foreground: #fff9f0;
+
+  --border: #232323;
+  --input: #232323;
+  --ring: #e2b437;
+
+  --chart-1: #e2b437;
+  --chart-2: #8c3b2b;
+  --chart-3: #6e7b3b;
+  --chart-4: #faf7f2;
+  --chart-5: #b86452;
+
+  --sidebar: #131313;
+  --sidebar-foreground: #faf7f2;
+  --sidebar-primary: #e2b437;
+  --sidebar-primary-foreground: #0c0c0c;
+  --sidebar-accent: #6e7b3b;
+  --sidebar-accent-foreground: #fff9f0;
+  --sidebar-border: #232323;
+  --sidebar-ring: #e2b437;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground;
+  }
 }

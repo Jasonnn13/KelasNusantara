@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   title: "Kelas Nusantara",
   description:
     "Platform pelestarian budaya Indonesia — belajar langsung dari para maestro seni tradisional, dari tari hingga batik, sambil mendukung kesejahteraan mereka.",
+  icons: {
+    icon: "/icon.svg",
+
+  },
 }
 
 export default function RootLayout({

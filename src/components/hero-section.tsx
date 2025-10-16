@@ -26,22 +26,22 @@ export function HeroSection() {
 
         <div className="relative">
           <div className="grid grid-cols-2 gap-3">
-            <img
+            <image
               src="/tari-bali-legong-dancer.png"
               alt="Penari Legong Bali"
               className="h-40 w-full rounded-md object-cover"
             />
-            <img
+            <image
               src="/gamelan-jawa-ensemble.png"
               alt="Ansambel Gamelan Jawa"
               className="h-40 w-full rounded-md object-cover"
             />
-            <img
+            <image
               src="/batik-tulis-workshop.png"
               alt="Proses Batik Tulis"
               className="h-40 w-full rounded-md object-cover"
             />
-            <img
+            <image
               src="/wayang-kulit-performance.png"
               alt="Pertunjukan Wayang Kulit"
               className="h-40 w-full rounded-md object-cover"

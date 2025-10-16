@@ -11,7 +11,7 @@ type ClassCardProps = {
 export function ClassCard({ title, category, description, imageUrl }: ClassCardProps) {
   return (
     <Card className="overflow-hidden">
-      <img
+      <image
         src={imageUrl || "/placeholder.svg"}
         alt={`${title} - ilustrasi`}
         className="h-40 w-full object-cover"

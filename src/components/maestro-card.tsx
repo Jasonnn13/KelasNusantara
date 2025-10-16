@@ -13,7 +13,7 @@ export function MaestroCard({ name, region, discipline, bio, imageUrl }: Maestro
   return (
     <Card className="overflow-hidden">
       <div className="flex items-center gap-4 p-4">
-        <img
+        <image
           src={imageUrl || "/placeholder.svg"}
           alt={`${name} - ${discipline}`}
           className="h-16 w-16 rounded-full object-cover"

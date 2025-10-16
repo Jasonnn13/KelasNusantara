@@ -4,10 +4,10 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
 const heroGallery = [
-  { src: "/tari-bali-legong-dancer.jpg", alt: "Penari Legong Bali", priority: true },
-  { src: "/gamelan-jawa-ensemble.jpg", alt: "Ansambel Gamelan Jawa" },
-  { src: "/batik-tulis-workshop.jpg", alt: "Proses Batik Tulis" },
-  { src: "/wayang-kulit-performance.jpg", alt: "Pertunjukan Wayang Kulit" },
+  { src: "/tari-bali-legong-dancer.png", alt: "Penari Legong Bali", priority: true },
+  { src: "/gamelan-jawa-ensemble.png", alt: "Ansambel Gamelan Jawa" },
+  { src: "/batik-tulis-workshop.png", alt: "Proses Batik Tulis" },
+  { src: "/wayang-kulit-performance.png", alt: "Pertunjukan Wayang Kulit" },
 ]
 
 export function HeroSection() {

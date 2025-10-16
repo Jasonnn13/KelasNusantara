@@ -1,3 +1,5 @@
+import Image from "next/image"
+
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
@@ -13,12 +15,16 @@ export function MaestroCard({ name, region, discipline, bio, imageUrl }: Maestro
   return (
     <Card className="overflow-hidden">
       <div className="flex items-center gap-4 p-4">
-        <image
-          src={imageUrl || "/placeholder.svg"}
-          alt={`${name} - ${discipline}`}
-          className="h-16 w-16 rounded-full object-cover"
-          crossOrigin="anonymous"
-        />
+        <div className="relative h-16 w-16 overflow-hidden rounded-full bg-muted/40">
+          <Image
+            src={imageUrl || "/placeholder.svg"}
+            alt={`${name} - ${discipline}`}
+            fill
+            sizes="64px"
+            className="object-cover"
+            priority={false}
+          />
+        </div>
         <div>
           <CardTitle className="text-base">{name}</CardTitle>
           <p className="text-xs text-muted-foreground">

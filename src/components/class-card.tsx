@@ -1,3 +1,5 @@
+import Image from "next/image"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
@@ -11,12 +13,16 @@ type ClassCardProps = {
 export function ClassCard({ title, category, description, imageUrl }: ClassCardProps) {
   return (
     <Card className="overflow-hidden">
-      <image
-        src={imageUrl || "/placeholder.svg"}
-        alt={`${title} - ilustrasi`}
-        className="h-40 w-full object-cover"
-        crossOrigin="anonymous"
-      />
+      <div className="relative h-40 w-full overflow-hidden bg-muted/40">
+        <Image
+          src={imageUrl || "/placeholder.svg"}
+          alt={`${title} - ilustrasi`}
+          fill
+          sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 100vw"
+          className="object-cover"
+          priority={false}
+        />
+      </div>
       <CardHeader>
         <CardTitle className="text-lg">{title}</CardTitle>
         <CardDescription className="text-xs">{category}</CardDescription>

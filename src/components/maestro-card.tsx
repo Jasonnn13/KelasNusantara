@@ -1,9 +1,10 @@
 import Image from "next/image"
 
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { FollowButton } from "./follow-button"
 
 type MaestroCardProps = {
+  id: string
   name: string
   region: string
   discipline: string
@@ -11,7 +12,7 @@ type MaestroCardProps = {
   imageUrl: string
 }
 
-export function MaestroCard({ name, region, discipline, bio, imageUrl }: MaestroCardProps) {
+export function MaestroCard({ id, name, region, discipline, bio, imageUrl }: MaestroCardProps) {
   return (
     <Card className="overflow-hidden">
       <div className="flex items-center gap-4 p-4">
@@ -35,9 +36,7 @@ export function MaestroCard({ name, region, discipline, bio, imageUrl }: Maestro
       <CardContent className="pt-0">
         <p className="line-clamp-3 text-sm text-muted-foreground">{bio}</p>
         <div className="mt-4">
-          <Button size="sm" className="bg-secondary text-secondary-foreground hover:opacity-90">
-            Ikuti Maestro
-          </Button>
+          <FollowButton maestroId={id} />
         </div>
       </CardContent>
     </Card>

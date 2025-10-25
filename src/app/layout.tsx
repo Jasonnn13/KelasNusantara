@@ -4,6 +4,8 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
+import { PageTransition } from "@/components/page-transition"
+import { Toaster } from "sonner"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -11,8 +13,9 @@ export const metadata: Metadata = {
   description:
     "Platform pelestarian budaya Indonesia — belajar langsung dari para maestro seni tradisional, dari tari hingga batik, sambil mendukung kesejahteraan mereka.",
   icons: {
-    icon: "/icon.svg",
-
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
   },
 }
 
@@ -24,10 +27,11 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`}>
-        <Suspense fallback={null}>
-          {children}
-          <Analytics />
-        </Suspense>
+          <Suspense fallback={<div className="min-h-screen" />}>
+            <PageTransition>{children}</PageTransition>
+            <Analytics />
+            <Toaster richColors />
+          </Suspense>
       </body>
     </html>
   )

@@ -1,11 +1,18 @@
+import Link from "next/link"
+
 import { SiteNavbar } from "@/components/site-navbar"
 import { HeroSection } from "@/components/hero-section"
 import { ClassCard } from "@/components/class-card"
 import { MaestroCard } from "@/components/maestro-card"
 import { SiteFooter } from "@/components/site-footer"
-import Link from "next/link"
+import { getFeaturedClasses, getMaestros } from "@/lib/queries"
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [classes, maestros] = await Promise.all([
+    getFeaturedClasses(6),
+    getMaestros(6),
+  ])
+
   return (
     <main>
       <SiteNavbar />
@@ -16,24 +23,15 @@ export default function HomePage() {
         <p className="mt-2 text-muted-foreground">Belajar seni tradisional dari ujung Aceh hingga Papua.</p>
 
         <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <ClassCard
-            title="Tari Legong"
-            category="Tari Bali"
-            description="Pelajari teknik dasar, ekspresi, dan filosofi Tari Legong dari maestro setempat."
-            imageUrl="/tari-bali-legong.png"
-          />
-          <ClassCard
-            title="Gamelan Jawa"
-            category="Musik Tradisional"
-            description="Memahami laras, gendhing, dan permainan instrumen inti gamelan."
-            imageUrl="/gamelan-jawa-ensemble.png"
-          />
-          <ClassCard
-            title="Membatik Tulis"
-            category="Kriya"
-            description="Dari menggambar pola hingga pewarnaan — proses batik tulis lengkap."
-            imageUrl="/batik-tulis-workshop.png"
-          />
+          {classes.map((c) => (
+            <ClassCard
+              key={c.id}
+              title={c.title}
+              category={c.category ?? "Umum"}
+              description={c.description ?? ""}
+              imageUrl={c.thumbnail_url ?? "/placeholder.svg"}
+            />
+          ))}
         </div>
       </section>
 
@@ -67,27 +65,17 @@ export default function HomePage() {
         <h2 className="text-balance text-2xl font-semibold tracking-tight md:text-3xl">Maestro Pilihan</h2>
         <p className="mt-2 text-muted-foreground">Tokoh pengajar yang berdedikasi menjaga warisan budaya Nusantara.</p>
         <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <MaestroCard
-            name="Ibu Saras Dewi"
-            region="Bali"
-            discipline="Tari Legong"
-            bio="Penari dan koreografer Legong dengan fokus pada teknik ekspresi mudra dan makna gerak."
-            imageUrl="/portrait-maestro-tari-bali.png"
-          />
-          <MaestroCard
-            name="Mas Rendra Sapto"
-            region="Yogyakarta"
-            discipline="Gamelan"
-            bio="Pengrawit yang telah mengajar karawitan dan komposisi gendhing di berbagai sanggar."
-            imageUrl="/portrait-maestro-gamelan-jawa.png"
-          />
-          <MaestroCard
-            name="Bu Ningsih"
-            region="Pekalongan"
-            discipline="Batik Tulis"
-            bio="Perajin batik turun-temurun, spesialis motif klasik dan pewarnaan alam."
-            imageUrl="/portrait-maestro-batik-tulis.png"
-          />
+          {maestros.map((m) => (
+            <MaestroCard
+              key={m.id}
+              id={m.id}
+              name={m.display_name}
+              region={m.region ?? ""}
+              discipline={m.discipline ?? ""}
+              bio={m.bio ?? ""}
+              imageUrl={m.photo_url ?? "/placeholder.svg"}
+            />
+          ))}
         </div>
       </section>
 

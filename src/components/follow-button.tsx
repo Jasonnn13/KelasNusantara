@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
+import { toast } from "sonner"
 
 type Props = { maestroId: string }
 
@@ -15,16 +16,22 @@ export function FollowButton({ maestroId }: Props) {
   useEffect(() => {
     let mounted = true
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { setFollowing(false); return }
-      const { data } = await supabase
-        .from("follows_maestros")
-        .select("maestro_id")
-        .eq("maestro_id", maestroId)
-        .eq("user_id", user.id)
-        .maybeSingle()
-      if (!mounted) return
-      setFollowing(!!data)
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) { setFollowing(false); return }
+        const { data, error } = await supabase
+          .from("follows_maestros")
+          .select("maestro_id")
+          .eq("maestro_id", maestroId)
+          .eq("user_id", user.id)
+          .maybeSingle()
+        if (error) throw error
+        if (!mounted) return
+        setFollowing(!!data)
+      } catch {
+        if (!mounted) return
+        setFollowing(false)
+      }
     }
     load()
     return () => { mounted = false }
@@ -43,13 +50,18 @@ export function FollowButton({ maestroId }: Props) {
           .eq("maestro_id", maestroId)
         if (error) throw error
         setFollowing(false)
+        toast.success("Berhenti mengikuti maestro.")
       } else {
         const { error } = await supabase
           .from("follows_maestros")
           .insert({ user_id: user.id, maestro_id: maestroId })
         if (error) throw error
         setFollowing(true)
+        toast.success("Sekarang mengikuti maestro.")
       }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal memproses."
+      toast.error(msg)
     } finally {
       setLoading(false)
     }

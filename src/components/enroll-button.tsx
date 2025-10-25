@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
+import { toast } from "sonner"
 
 export function EnrollButton({ classId }: { classId: string }) {
   const [loading, setLoading] = useState(false)
@@ -23,13 +24,16 @@ export function EnrollButton({ classId }: { classId: string }) {
 
       const { error } = await supabase.from("enrollments").insert({ user_id: user.id, class_id: classId })
       if (error && error.message.includes("duplicate key")) {
-        alert("Kamu sudah terdaftar di kelas ini.")
+        toast.info("Kamu sudah terdaftar di kelas ini.")
       } else if (error) {
-        alert(`Gagal mendaftar: ${error.message}`)
+        toast.error(`Gagal mendaftar: ${error.message}`)
       } else {
-        alert("Berhasil mendaftar! Selamat belajar.")
+        toast.success("Berhasil mendaftar! Selamat belajar.")
         router.refresh()
       }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal memproses."
+      toast.error(msg)
     } finally {
       setLoading(false)
     }

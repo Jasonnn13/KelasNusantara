@@ -3,6 +3,7 @@ import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
+import { resolveMediaUrl } from "@/lib/queries"
 import { SiteNavbar } from "@/components/site-navbar"
 import { SiteFooter } from "@/components/site-footer"
 
@@ -40,9 +41,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         <div className="grid items-start gap-8 md:grid-cols-2">
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-md bg-muted/40">
             <Image
-              src={(data.thumbnail_url && !data.thumbnail_url.startsWith("/") && !data.thumbnail_url.startsWith("http")
-                ? supabase.storage.from("media").getPublicUrl(data.thumbnail_url).data.publicUrl
-                : data.thumbnail_url) || "/placeholder.svg"}
+              src={resolveMediaUrl(data.thumbnail_url) || "/placeholder.svg"}
               alt={data.title}
               fill
               className="object-cover"

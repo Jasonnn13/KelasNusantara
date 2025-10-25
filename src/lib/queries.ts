@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase"
 
-function normalizeStoragePath(path: string) {
+export function normalizeStoragePath(path: string) {
   // Trim common accidental prefixes
   let p = path.replace(/^public\//, "").replace(/^\/?media\//, "")
   // Fix common seed mismatch: .jpg vs .png (our assets are .png)
@@ -8,7 +8,7 @@ function normalizeStoragePath(path: string) {
   return p
 }
 
-function resolveMediaUrl(path: string | null | undefined) {
+export function resolveMediaUrl(path: string | null | undefined) {
   if (!path) return null
   if (path.startsWith("http")) return path
   if (path.startsWith("/")) {

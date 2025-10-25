@@ -26,6 +26,7 @@ export default async function HomePage() {
           {classes.map((c) => (
             <ClassCard
               key={c.id}
+              id={c.id}
               title={c.title}
               category={c.category ?? "Umum"}
               description={c.description ?? ""}

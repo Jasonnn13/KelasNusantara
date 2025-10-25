@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 
 // Public routes that don't require authentication
-const PUBLIC_PATHS = new Set<string>(["/", "/auth/sign-in", "/auth/sign-out", "/auth/register", "/favicon.ico", "/logo.png"]) 
+const PUBLIC_PATHS = new Set<string>(["/", "/auth/sign-in", "/auth/sign-out", "/auth/register", "/favicon.ico", "/logo.png", "/icon.svg"]) 
 
 function isPublicPath(pathname: string) {
   if (PUBLIC_PATHS.has(pathname)) return true
@@ -51,5 +51,5 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   // Process all routes except Next.js internals and favicons
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|logo.png).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|logo.png|icon.svg).*)"],
 }

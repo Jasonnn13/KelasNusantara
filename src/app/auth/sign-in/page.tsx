@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
+import { z } from "zod"
 import { supabase } from "@/lib/supabase"
 
 export default function SignInPage() {
@@ -33,9 +34,11 @@ export default function SignInPage() {
       // Ensure profile exists (insert if missing)
       const user = data.user
       if (user) {
-        // Prefer the desired_role stored in user metadata from sign-up
-        const desired = (user.user_metadata as any)?.desired_role as "student" | "maestro" | undefined
-        const role = desired ?? "student"
+        // Prefer the desired_role stored in user metadata from sign-up (parse safely to avoid any)
+        const Meta = z.object({ desired_role: z.enum(["student", "maestro"]).optional() }).passthrough()
+        const parse = Meta.safeParse(user.user_metadata)
+        const desired = parse.success ? parse.data.desired_role : undefined
+        const role: "student" | "maestro" = desired ?? "student"
         await supabase.from("profiles").upsert({ id: user.id, role })
       }
       router.replace(next)

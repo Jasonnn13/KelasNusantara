@@ -7,6 +7,9 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { z } from "zod"
 import { supabase } from "@/lib/supabase"
+import { SiteNavbar } from "@/components/site-navbar"
+import { SiteFooter } from "@/components/site-footer"
+import { toast } from "sonner"
 
 export default function SignInPage() {
   const [email, setEmail] = useState("")
@@ -41,46 +44,51 @@ export default function SignInPage() {
         const role: "student" | "maestro" = desired ?? "student"
         await supabase.from("profiles").upsert({ id: user.id, role })
       }
+      toast.success("Berhasil masuk")
       router.replace(next)
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Terjadi kesalahan"
-      alert(message)
+      toast.error(message)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <main className="mx-auto flex min-h-[60vh] max-w-md flex-col justify-center px-4 py-10">
-      <h1 className="text-2xl font-semibold">Masuk</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Masuk dengan email dan kata sandi.</p>
+    <main>
+      <SiteNavbar />
+      <section className="mx-auto flex min-h-[60vh] max-w-md flex-col justify-center px-4 py-10">
+        <h1 className="text-2xl font-semibold">Masuk</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Masuk dengan email dan kata sandi.</p>
 
-      <form onSubmit={onSubmit} className="mt-6 space-y-3">
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="email@contoh.com"
-          required
-          className="w-full rounded-md border px-3 py-2"
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Kata sandi"
-          required
-          className="w-full rounded-md border px-3 py-2"
-        />
-        <div className="flex gap-2">
-          <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground hover:opacity-90">
-            {loading ? "Memproses…" : "Masuk"}
-          </Button>
-          <Link href={{ pathname: "/auth/register", query: { next } }} className="ml-auto self-center text-sm underline">
-            Belum punya akun? Daftar
-          </Link>
-        </div>
-      </form>
+        <form onSubmit={onSubmit} className="mt-6 space-y-3">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="email@contoh.com"
+            required
+            className="w-full rounded-md border px-3 py-2"
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Kata sandi"
+            required
+            className="w-full rounded-md border px-3 py-2"
+          />
+          <div className="flex gap-2">
+            <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground hover:opacity-90">
+              {loading ? "Memproses…" : "Masuk"}
+            </Button>
+            <Link href={{ pathname: "/auth/register", query: { next } }} className="ml-auto self-center text-sm underline">
+              Belum punya akun? Daftar
+            </Link>
+          </div>
+        </form>
+      </section>
+      <SiteFooter />
     </main>
   )
 }

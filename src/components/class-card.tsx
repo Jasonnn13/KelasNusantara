@@ -14,24 +14,25 @@ type ClassCardProps = {
 
 export function ClassCard({ id, title, category, description, imageUrl }: ClassCardProps) {
   return (
-    <Card className="overflow-hidden">
-      <Link href={`/kelas/${id}`} className="block">
-        <div className="relative h-40 w-full overflow-hidden bg-muted/40">
+    <Card className="group flex h-full flex-col overflow-hidden rounded-2xl shadow-sm gap-0 p-0">
+      <Link href={`/kelas/${id}`} className="flex flex-1 flex-col">
+        <div className="relative w-full overflow-hidden aspect-[4/3]">
           <Image
             src={imageUrl || "/placeholder.svg"}
             alt={`${title} - ilustrasi`}
             fill
             sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 100vw"
-            className="object-cover"
+            className="object-cover object-center"
             priority={false}
           />
+          <div className="absolute inset-0 rounded-t-[inherit] ring-1 ring-inset ring-border/40" aria-hidden="true" />
         </div>
-        <CardHeader>
+        <CardHeader className="flex-1 border-t border-border/60 px-6 pt-4">
           <CardTitle className="text-lg">{title}</CardTitle>
           <CardDescription className="text-xs">{category}</CardDescription>
         </CardHeader>
       </Link>
-      <CardContent className="flex items-center justify-between">
+      <CardContent className="flex items-end justify-between gap-4 px-6 pb-6">
         <p className="line-clamp-2 text-sm text-muted-foreground">{description}</p>
         <Button asChild size="sm" className="bg-primary text-primary-foreground hover:opacity-90">
           <Link href={`/daftar/${id}`}>Daftar</Link>

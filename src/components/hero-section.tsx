@@ -20,7 +20,7 @@ export function HeroSection() {
           </h1>
           <p className="mt-4 text-pretty text-base leading-relaxed text-muted-foreground md:text-lg">
             Kelas Nusantara menghubungkan pelajar dengan maestro tari, gamelan, batik, dan berbagai seni leluhur. Dukung
-            pelestarian budaya sambil belajar langsung ddari maestronya!
+            pelestarian budaya sambil belajar langsung dari maestronya!
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">

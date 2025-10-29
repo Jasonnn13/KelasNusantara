@@ -1,6 +1,7 @@
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
+  transpilePackages: ["@supabase/supabase-js", "@supabase/auth-js"],
   images: {
     remotePatterns: [
       {

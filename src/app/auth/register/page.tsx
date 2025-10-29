@@ -5,6 +5,9 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
+import { SiteNavbar } from "@/components/site-navbar"
+import { SiteFooter } from "@/components/site-footer"
+import { toast } from "sonner"
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("")
@@ -33,73 +36,80 @@ export default function RegisterPage() {
         // Session available: we can create profile immediately
         const user = data.user
         await supabase.from("profiles").upsert({ id: user.id, role })
+        toast.success("Akun dibuat dan masuk otomatis")
         router.replace(next)
       } else {
         setMessage("Akun dibuat. Cek email untuk konfirmasi sebelum masuk.")
+        toast.message("Akun dibuat. Cek email untuk konfirmasi.")
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Terjadi kesalahan"
       setMessage(msg)
+      toast.error(msg)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <main className="mx-auto flex min-h-[60vh] max-w-md flex-col justify-center px-4 py-10">
-      <h1 className="text-2xl font-semibold">Daftar Akun</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Gunakan email dan kata sandi, pilih peranmu.</p>
+    <main>
+      <SiteNavbar />
+      <section className="mx-auto flex min-h-[60vh] max-w-md flex-col justify-center px-4 py-10">
+        <h1 className="text-2xl font-semibold">Daftar Akun</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Gunakan email dan kata sandi, pilih peranmu.</p>
 
-      <form onSubmit={onSubmit} className="mt-6 space-y-3">
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="email@contoh.com"
-          required
-          className="w-full rounded-md border px-3 py-2"
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Kata sandi minimal 6 karakter"
-          required
-          minLength={6}
-          className="w-full rounded-md border px-3 py-2"
-        />
-        <div className="flex items-center gap-4 pt-2">
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="radio"
-              name="role"
-              value="student"
-              checked={role === "student"}
-              onChange={() => setRole("student")}
-            />
-            <span>Saya murid</span>
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="radio"
-              name="role"
-              value="maestro"
-              checked={role === "maestro"}
-              onChange={() => setRole("maestro")}
-            />
-            <span>Saya maestro</span>
-          </label>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground hover:opacity-90">
-            {loading ? "Mendaftar…" : "Daftar"}
-          </Button>
-          <Link href={{ pathname: "/auth/sign-in", query: { next } }} className="text-sm underline">
-            Sudah punya akun? Masuk
-          </Link>
-        </div>
-        {message && <p className="text-sm text-muted-foreground">{message}</p>}
-      </form>
+        <form onSubmit={onSubmit} className="mt-6 space-y-3">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="email@contoh.com"
+            required
+            className="w-full rounded-md border px-3 py-2"
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Kata sandi minimal 6 karakter"
+            required
+            minLength={6}
+            className="w-full rounded-md border px-3 py-2"
+          />
+          <div className="flex items-center gap-4 pt-2">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="radio"
+                name="role"
+                value="student"
+                checked={role === "student"}
+                onChange={() => setRole("student")}
+              />
+              <span>Saya murid</span>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="radio"
+                name="role"
+                value="maestro"
+                checked={role === "maestro"}
+                onChange={() => setRole("maestro")}
+              />
+              <span>Saya maestro</span>
+            </label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground hover:opacity-90">
+              {loading ? "Mendaftar…" : "Daftar"}
+            </Button>
+            <Link href={{ pathname: "/auth/sign-in", query: { next } }} className="text-sm underline">
+              Sudah punya akun? Masuk
+            </Link>
+          </div>
+          {message && <p className="text-sm text-muted-foreground">{message}</p>}
+        </form>
+      </section>
+      <SiteFooter />
     </main>
   )
 }

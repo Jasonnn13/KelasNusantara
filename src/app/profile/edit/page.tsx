@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
 
-type Role = "student" | "maestro" 
+type Role = "student" | "maestro" | "admin"
 
 type ViewState =
 	| { status: "loading" }
@@ -151,41 +151,39 @@ export default function EditProfilePage() {
 	}
 
 			const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-		event.preventDefault()
-		if (!userIdRef.current) return
+				event.preventDefault()
+				if (!userIdRef.current) return
 
-		setIsSaving(true)
-		const userId = userIdRef.current
+				setIsSaving(true)
+				const userId = userIdRef.current
+				const isMaestro = role === "maestro"
 
-			const normalizedFullName = formValues.fullName.trim() || null
-			const normalizedAvatar = formValues.avatarUrl.trim() || null
-			const normalizedBio = formValues.bio.trim() || null
-			const normalizedRegion = formValues.region.trim() || null
-			const normalizedDiscipline = formValues.discipline.trim() || null
-			const normalizedDisplayName = formValues.displayName.trim() || null
+				const normalizedFullName = formValues.fullName.trim() || null
+				const normalizedAvatar = formValues.avatarUrl.trim() || null
+				const normalizedBio = formValues.bio.trim() || null
+				const normalizedRegion = formValues.region.trim() || null
+				const normalizedDiscipline = formValues.discipline.trim() || null
+				const normalizedDisplayName = formValues.displayName.trim() || null
 
 				const profilePayload = {
 					full_name: normalizedFullName,
 					avatar_url: normalizedAvatar,
-		        	bio: normalizedBio,
-		        	region: role === "maestro" ? normalizedRegion : null,
-		        	discipline: role === "maestro" ? normalizedDiscipline : null,
 				}
 
-		const maestroPayload = {
-			id: userId,
+				const maestroPayload = {
+					id: userId,
 					display_name: normalizedDisplayName,
 					region: normalizedRegion,
 					discipline: normalizedDiscipline,
 					bio: normalizedBio,
 					photo_url: normalizedAvatar,
-		}
+				}
 
 		try {
 			const { error: profileError } = await supabase.from("profiles").update(profilePayload).eq("id", userId)
 			if (profileError) throw profileError
 
-			if (role === "maestro") {
+			if (isMaestro) {
 				const { error: maestroError } = await supabase
 					.from("maestros")
 					.upsert(maestroPayload, { onConflict: "id" })
@@ -196,6 +194,10 @@ export default function EditProfilePage() {
 				data: {
 					full_name: profilePayload.full_name,
 					avatar_url: profilePayload.avatar_url,
+					display_name: isMaestro ? normalizedDisplayName : null,
+					region: isMaestro ? normalizedRegion : null,
+					discipline: isMaestro ? normalizedDiscipline : null,
+					bio: isMaestro ? normalizedBio : null,
 					role,
 				},
 			})
@@ -357,20 +359,19 @@ export default function EditProfilePage() {
 													<p className="text-xs text-muted-foreground">Unggah gambar JPG, PNG, atau WebP hingga 5MB.</p>
 												</div>
 
-								<div className="grid gap-2">
-									<Label htmlFor="bio">Biografi</Label>
-									<Textarea
-										id="bio"
-										placeholder="Ceritakan tentang dirimu atau disiplin yang kamu tekuni."
-										rows={5}
-										value={formValues.bio}
-										onChange={handleChange("bio")}
-									/>
-								</div>
-
 								{role === "maestro" && (
 									<div className="grid gap-4 rounded-lg border bg-muted/30 p-4">
 										<p className="text-sm font-medium text-foreground">Detail Maestro</p>
+										<div className="grid gap-2">
+											<Label htmlFor="bio">Biografi</Label>
+											<Textarea
+												id="bio"
+												placeholder="Ceritakan tentang dirimu atau disiplin yang kamu tekuni."
+												rows={5}
+												value={formValues.bio}
+												onChange={handleChange("bio")}
+											/>
+										</div>
 										<div className="grid gap-2">
 											<Label htmlFor="displayName">Nama panggung</Label>
 											<Input

@@ -4,6 +4,7 @@ import { ClassCard } from "@/components/class-card"
 import { SiteNavbar } from "@/components/site-navbar"
 import { SiteFooter } from "@/components/site-footer"
 import { getFeaturedClasses } from "@/lib/queries"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export const revalidate = 60
 
@@ -58,10 +59,18 @@ export default function KelasPage() {
   return (
     <main>
       <SiteNavbar />
-      <section className="mx-auto max-w-6xl px-4 py-10">
+      <section className="mx-auto max-w-6xl px-4 py-10 sm:py-12">
         <h1 className="text-balance text-3xl font-bold tracking-tight md:text-4xl">Semua Kelas</h1>
         <p className="mt-2 text-muted-foreground">Pilih kelas favoritmu dari seluruh Nusantara.</p>
-        <Suspense fallback={<div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{Array.from({length:6}).map((_,i)=>(<div key={i} className="h-40 rounded-md bg-muted/50"/>))}</div>}>
+        <Suspense
+          fallback={
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <Skeleton key={index} className="h-48 w-full rounded-2xl" />
+              ))}
+            </div>
+          }
+        >
           <ClassesGrid />
         </Suspense>
       </section>

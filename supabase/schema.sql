@@ -81,6 +81,16 @@ create table if not exists public.enrollments (
 create index if not exists enrollments_user_idx on public.enrollments (user_id);
 create index if not exists enrollments_class_idx on public.enrollments (class_id);
 
+create table if not exists public.class_join_events (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  class_id uuid not null references public.classes(id) on delete cascade,
+  joined_at timestamptz not null default now(),
+  unique (user_id, class_id)
+);
+create index if not exists class_join_events_user_idx on public.class_join_events (user_id);
+create index if not exists class_join_events_class_idx on public.class_join_events (class_id);
+
 create table if not exists public.reviews (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
@@ -222,6 +232,7 @@ alter table public.enrollments enable row level security;
 alter table public.reviews enable row level security;
 alter table public.favorites enable row level security;
 alter table public.follows_maestros enable row level security;
+alter table public.class_join_events enable row level security;
 
 create policy "Profiles are viewable by everyone" on public.profiles
 for select using (true);
@@ -287,6 +298,20 @@ create policy "Users read their follows" on public.follows_maestros
 for select using (auth.uid() = user_id);
 
 create policy "Users write their follows" on public.follows_maestros
+CREATE POLICY "users_only_all_ops" ON public.class_join_events
+  FOR ALL
+  TO authenticated
+  USING ( (SELECT auth.uid()) = user_id )
+  WITH CHECK ( (SELECT auth.uid()) = user_id );
+
+create policy "Users read their class join events" on public.class_join_events
+for select using (
+  auth.uid() = user_id or exists (
+    select 1 from public.classes c where c.id = class_join_events.class_id and c.maestro_id = auth.uid()
+  )
+);
+
+create policy "Users write their class join events" on public.class_join_events
 for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 -- =====================================
@@ -321,3 +346,4 @@ values
   ('tari-saman', 'Tari Saman Aceh'),
   ('wayang-kulit', 'Wayang Kulit')
 on conflict (slug) do update set name = excluded.name;
+

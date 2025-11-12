@@ -2,39 +2,15 @@ import Image from "next/image"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
-import { supabase } from "@/lib/supabase"
+import { getClassById } from "@/lib/queries"
 import { SiteNavbar } from "@/components/site-navbar"
 import { SiteFooter } from "@/components/site-footer"
 
 export const revalidate = 30
 
-async function getClassById(id: string) {
-  const { data, error } = await supabase
-    .from("v_classes")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle()
-
-  if (error) throw error
-  return data
-}
-
-export default async function Page({ params }: { params: { id: string } }) {
-  const id = params.id
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const cls = await getClassById(id)
-
-  function normalizeStoragePath(path: string) {
-    let p = path.replace(/^public\//, "").replace(/^\/?media\//, "")
-    if (p.endsWith(".jpg")) p = p.replace(/\.jpg$/i, ".png")
-    return p
-  }
-  function resolveStorageUrl(path: string | null | undefined) {
-    if (!path) return null
-    if (path.startsWith("http")) return path
-    if (path.startsWith("/")) return path
-    const { data } = supabase.storage.from("media").getPublicUrl(normalizeStoragePath(path))
-    return data.publicUrl
-  }
 
   if (!cls) {
     // Fallback to dummy detail if coming from dummy list item (for screenshots)
@@ -101,7 +77,7 @@ export default async function Page({ params }: { params: { id: string } }) {
           <div className="grid items-stretch gap-0 md:grid-cols-2">
             <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted/40">
               <Image
-                src={resolveStorageUrl(cls.thumbnail_url) || "/placeholder.svg"}
+                src={cls.thumbnail_url ?? "/placeholder.svg"}
                 alt={cls.title}
                 fill
                 className="object-cover"

@@ -1,4 +1,8 @@
-import { supabase } from "@/lib/supabase"
+import "server-only"
+
+import { getServerSupabaseClient } from "@/lib/supabase-server"
+
+const supabase = getServerSupabaseClient()
 
 export function normalizeStoragePath(path: string) {
   // Trim common accidental prefixes
@@ -15,10 +19,10 @@ export function resolveMediaUrl(path: string | null | undefined) {
     // If a leading slash is used, assume it's a local public asset
     return path
   }
-  // Treat as storage object path in 'media' bucket
   const objectPath = normalizeStoragePath(path)
-  const { data } = supabase.storage.from("media").getPublicUrl(objectPath)
-  return data.publicUrl
+  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (!baseUrl) return `/media/${objectPath}`
+  return `${baseUrl.replace(/\/$/, "")}/storage/v1/object/public/media/${objectPath}`
 }
 
 export type VClass = {
@@ -75,4 +79,58 @@ export async function getMaestros(limit = 6) {
   if (error) throw error
   const rows = (data as Maestro[]) ?? []
   return rows.map((m) => ({ ...m, photo_url: resolveMediaUrl(m.photo_url) as string | null }))
+}
+
+export async function getClassById(id: string) {
+  const { data, error } = await supabase
+    .from("v_classes")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle()
+
+  if (error) throw error
+  if (!data) return null
+  const record = data as VClass
+  return {
+    ...record,
+    thumbnail_url: resolveMediaUrl(record.thumbnail_url),
+    maestro_photo_url: resolveMediaUrl(record.maestro_photo_url),
+  }
+}
+
+export async function getMaestroById(id: string) {
+  const { data, error } = await supabase
+    .from("maestros")
+    .select("id, display_name, region, discipline, bio, photo_url")
+    .eq("id", id)
+    .maybeSingle()
+
+  if (error) throw error
+  if (!data) return null
+  const record = data as Maestro
+  return {
+    ...record,
+    photo_url: resolveMediaUrl(record.photo_url),
+  }
+}
+
+export type MaestroClassSummary = Pick<
+  VClass,
+  "id" | "title" | "description" | "category" | "thumbnail_url" | "created_at"
+>
+
+export async function getClassesByMaestroId(maestroId: string, limit = 12) {
+  const { data, error } = await supabase
+    .from("v_classes")
+    .select("id, title, description, category, thumbnail_url, created_at")
+    .eq("maestro_id", maestroId)
+    .order("created_at", { ascending: false })
+    .limit(limit)
+
+  if (error) throw error
+  const rows = (data as MaestroClassSummary[]) ?? []
+  return rows.map((item) => ({
+    ...item,
+    thumbnail_url: resolveMediaUrl(item.thumbnail_url),
+  }))
 }

@@ -32,9 +32,13 @@ export function ClassCard({ id, title, category, description, imageUrl }: ClassC
           <CardDescription className="text-xs">{category}</CardDescription>
         </CardHeader>
       </Link>
-      <CardContent className="flex items-end justify-between gap-4 px-6 pb-6">
-        <p className="line-clamp-2 text-sm text-muted-foreground">{description}</p>
-        <Button asChild size="sm" className="bg-primary text-primary-foreground hover:opacity-90">
+      <CardContent className="flex flex-col gap-4 px-6 pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <p className="line-clamp-2 text-sm text-muted-foreground sm:max-w-[70%]">{description}</p>
+        <Button
+          asChild
+          size="sm"
+          className="w-full bg-primary text-primary-foreground hover:opacity-90 sm:w-auto"
+        >
           <Link href={`/daftar/${id}`}>Daftar</Link>
         </Button>
       </CardContent>

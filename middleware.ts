@@ -1,7 +1,7 @@
-import { NextResponse, type NextRequest } from "next/server"
+import { NextResponse } from "next/server"
 
 // Middleware temporarily disabled per request
-export function middleware(_req: NextRequest) {
+export function middleware() {
   return NextResponse.next()
 }
 

@@ -1,76 +1,35 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { CircleUser } from "lucide-react"
+import { CircleUser, Menu, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { supabase } from "@/lib/supabase"
 import { cn } from "@/lib/utils"
+import { useProfile } from "@/components/profile-provider"
 
 export function SiteNavbar() {
   const pathname = usePathname()
-  const navLinks = [
+  const navLinks = useMemo(
+    () => [
     { href: "/", label: "Beranda" },
     { href: "/kelas", label: "Kelas" },
     { href: "/maestro", label: "Maestro" },
     { href: "/tentang", label: "Tentang" },
-  ]
+    ],
+    []
+  )
 
-  const [authState, setAuthState] = useState<"loading" | "authenticated" | "unauthenticated">("loading")
-  const [profileAvatar, setProfileAvatar] = useState<string | null>(null)
-  const [profileName, setProfileName] = useState<string | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const { authState, profile } = useProfile()
 
   useEffect(() => {
-    let active = true
+    setMenuOpen(false)
+  }, [pathname])
 
-    async function handleProfile(userId: string) {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("avatar_url, full_name")
-        .eq("id", userId)
-        .maybeSingle()
-
-      if (!active) return
-
-      if (error) {
-        console.warn("Gagal memuat profil", error.message)
-      }
-
-      setProfileAvatar(data?.avatar_url ?? null)
-      setProfileName(data?.full_name ?? null)
-      setAuthState("authenticated")
-    }
-
-    supabase.auth.getUser().then(({ data, error }) => {
-      if (!active) return
-      if (error || !data.user) {
-        setAuthState("unauthenticated")
-        return
-      }
-      handleProfile(data.user.id)
-    })
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!active) return
-      if (session?.user) {
-        handleProfile(session.user.id)
-      } else {
-        setAuthState("unauthenticated")
-        setProfileAvatar(null)
-        setProfileName(null)
-      }
-    })
-
-    return () => {
-      active = false
-      listener?.subscription.unsubscribe()
-    }
-  }, [])
-
-  const profileInitial = profileName?.charAt(0).toUpperCase() ?? null
+  const profileInitial = profile?.fullName?.charAt(0).toUpperCase() ?? profile?.email?.charAt(0).toUpperCase() ?? null
 
   const profileControl = (() => {
     if (authState === "loading") {
@@ -98,10 +57,10 @@ export function SiteNavbar() {
       >
         <Link href="/profile" aria-label="Buka profil Anda">
           <span className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full">
-            {profileAvatar ? (
+            {profile?.avatarUrl ? (
               <Image
-                src={profileAvatar}
-                alt={profileName ? `Foto profil ${profileName}` : "Foto profil"}
+                src={profile.avatarUrl}
+                alt={profile?.fullName ? `Foto profil ${profile.fullName}` : "Foto profil"}
                 fill
                 sizes="36px"
                 className="object-cover"
@@ -119,13 +78,25 @@ export function SiteNavbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link href="/" className="font-semibold text-lg tracking-tight">
-          <span className="text-primary">Kelas</span> <span className="text-foreground">Nusantara</span>
-          <span className="sr-only">{"Beranda Kelas Nusantara"}</span>
-        </Link>
+      <nav className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+        <div className="flex flex-1 items-center gap-3">
+          <Link href="/" className="text-lg font-semibold tracking-tight">
+            <span className="text-primary">Kelas</span> <span className="text-foreground">Nusantara</span>
+            <span className="sr-only">{"Beranda Kelas Nusantara"}</span>
+          </Link>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="ml-auto h-9 w-9 md:hidden"
+            aria-label={menuOpen ? "Tutup navigasi" : "Buka navigasi"}
+            onClick={() => setMenuOpen((state) => !state)}
+          >
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
 
-        <ul className="hidden gap-6 text-sm md:flex">
+        <ul className="hidden items-center gap-6 text-sm md:flex">
           {navLinks.map(({ href, label }) => {
             const isActive = href === "/" ? pathname === href : pathname.startsWith(href)
             return (
@@ -146,21 +117,23 @@ export function SiteNavbar() {
           })}
         </ul>
 
-        <div className="flex items-center gap-2">
-          <Button asChild className="bg-primary text-primary-foreground hover:opacity-90">
+        <div className="hidden items-center gap-2 md:flex">
+          <Button asChild size="sm" className="bg-primary text-primary-foreground hover:opacity-90">
             <Link href="/kelas">Jelajahi Kelas</Link>
           </Button>
           <Button
             asChild
+            size="sm"
             variant="outline"
-            className="border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground bg-transparent"
+            className="bg-transparent border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground"
           >
             <Link href="/maestro">Jadi Maestro</Link>
           </Button>
           {profileControl}
-          <div className="hidden w-[102px] md:block">
+          <div className="w-[102px]">
             <Button
               asChild
+              size="sm"
               variant="outline"
               className={cn(
                 "text-sm transition-opacity duration-200",
@@ -173,6 +146,55 @@ export function SiteNavbar() {
           </div>
         </div>
       </nav>
+
+      <div
+        className={cn(
+          "md:hidden",
+          menuOpen ? "block" : "hidden"
+        )}
+      >
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 pb-4">
+          <ul className="flex flex-col gap-2 text-sm">
+            {navLinks.map(({ href, label }) => {
+              const isActive = href === "/" ? pathname === href : pathname.startsWith(href)
+              return (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className={cn(
+                      "block rounded-md px-3 py-2 transition-colors",
+                      isActive ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                    )}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+          <div className="flex flex-col gap-2">
+            <Button asChild className="w-full bg-primary text-primary-foreground">
+              <Link href="/kelas">Jelajahi Kelas</Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="w-full border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground"
+            >
+              <Link href="/maestro">Jadi Maestro</Link>
+            </Button>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm text-muted-foreground">Akun</span>
+              {profileControl}
+            </div>
+            {authState !== "authenticated" && (
+              <Button asChild variant="ghost" className="w-full justify-center text-sm">
+                <Link href="/auth/register">Daftar</Link>
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
     </header>
   )
 }

@@ -6,6 +6,7 @@ import { SiteNavbar } from "@/components/site-navbar"
 import { SiteFooter } from "@/components/site-footer"
 import { Button } from "@/components/ui/button"
 import { getMaestros } from "@/lib/queries"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export const revalidate = 60
 
@@ -55,7 +56,7 @@ export default function MaestroPage() {
   return (
     <main>
       <SiteNavbar />
-      <section className="mx-auto max-w-6xl px-4 py-10">
+      <section className="mx-auto max-w-6xl px-4 py-10 sm:py-12">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-balance text-3xl font-bold tracking-tight md:text-4xl">Maestro Nusantara</h1>
@@ -67,7 +68,15 @@ export default function MaestroPage() {
             <Link href="/maestro">Ajukan Diri sebagai Maestro</Link>
           </Button>
         </div>
-        <Suspense fallback={<div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{Array.from({length:6}).map((_,i)=>(<div key={i} className="h-20 rounded-md bg-muted/50"/>))}</div>}>
+        <Suspense
+          fallback={
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <Skeleton key={index} className="h-28 w-full rounded-2xl" />
+              ))}
+            </div>
+          }
+        >
           <MaestroGrid />
         </Suspense>
       </section>

@@ -2,10 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
-import { Analytics } from "@vercel/analytics/next"
-import { Suspense } from "react"
-import { PageTransition } from "@/components/page-transition"
-import { Toaster } from "sonner"
+import { ClientShell } from "@/components/client-shell"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -27,11 +24,7 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`}>
-          <Suspense fallback={<div className="min-h-screen" />}>
-            <PageTransition>{children}</PageTransition>
-            <Analytics />
-            <Toaster richColors />
-          </Suspense>
+        <ClientShell>{children}</ClientShell>
       </body>
     </html>
   )

@@ -2,25 +2,15 @@ import Image from "next/image"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
-import { supabase } from "@/lib/supabase"
-import { resolveMediaUrl } from "@/lib/queries"
+import { ConfirmEnrollButton } from "@/components/confirm-enroll-button"
+import { getClassById } from "@/lib/queries"
 import { SiteNavbar } from "@/components/site-navbar"
 import { SiteFooter } from "@/components/site-footer"
 
 export const revalidate = 30
 
-async function getClassById(id: string) {
-  const { data, error } = await supabase
-    .from("v_classes")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle()
-  if (error) throw error
-  return data
-}
-
-export default async function Page({ params }: { params: { id: string } }) {
-  const id = params.id
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const cls = await getClassById(id)
 
   const isDummy = !cls && id.startsWith("dummy-")
@@ -41,7 +31,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         <div className="grid items-start gap-8 md:grid-cols-2">
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-md bg-muted/40">
             <Image
-              src={resolveMediaUrl(data.thumbnail_url) || "/placeholder.svg"}
+              src={data.thumbnail_url ?? "/placeholder.svg"}
               alt={data.title}
               fill
               className="object-cover"
@@ -57,7 +47,13 @@ export default async function Page({ params }: { params: { id: string } }) {
               {data.maestro_region ? ` • ${data.maestro_region}` : ""}
             </p>
             <div className="mt-6 flex items-center gap-4">
-              <Button className="bg-primary text-primary-foreground hover:opacity-90">Konfirmasi Daftar</Button>
+              {isDummy ? (
+                <Button disabled className="bg-primary text-primary-foreground">
+                  Konfirmasi Daftar
+                </Button>
+              ) : (
+                <ConfirmEnrollButton classId={data.id} classTitle={data.title} />
+              )}
               <Button asChild variant="secondary">
                 <Link href={`/kelas/${id}`}>Lihat Detail Kelas</Link>
               </Button>

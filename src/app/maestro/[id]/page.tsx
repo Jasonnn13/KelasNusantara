@@ -1,40 +1,21 @@
 import Image from "next/image"
 import Link from "next/link"
 
+import { ClassCard } from "@/components/class-card"
 import { Button } from "@/components/ui/button"
-import { supabase } from "@/lib/supabase"
 import { SiteNavbar } from "@/components/site-navbar"
 import { SiteFooter } from "@/components/site-footer"
+import { getMaestroById, getClassesByMaestroId, type MaestroClassSummary } from "@/lib/queries"
 
 export const revalidate = 30
 
-async function getMaestroById(id: string) {
-  const { data, error } = await supabase
-    .from("maestros")
-    .select("id, display_name, region, discipline, bio, photo_url")
-    .eq("id", id)
-    .maybeSingle()
-
-  if (error) throw error
-  return data
-}
-
-export default async function Page({ params }: { params: { id: string } }) {
-  const id = params.id
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const maestro = await getMaestroById(id)
 
-  function normalizeStoragePath(path: string) {
-    let p = path.replace(/^public\//, "").replace(/^\/?media\//, "")
-    if (p.endsWith(".jpg")) p = p.replace(/\.jpg$/i, ".png")
-    return p
-  }
-  function resolveStorageUrl(path: string | null | undefined) {
-    if (!path) return null
-    if (path.startsWith("http")) return path
-    if (path.startsWith("/")) return path
-    const { data } = supabase.storage.from("media").getPublicUrl(normalizeStoragePath(path))
-    return data.publicUrl
-  }
+  const classes: MaestroClassSummary[] = maestro
+    ? await getClassesByMaestroId(id).catch(() => [] as MaestroClassSummary[])
+    : []
 
   if (!maestro) {
     if (id.startsWith("dummy-")) {
@@ -86,25 +67,62 @@ export default async function Page({ params }: { params: { id: string } }) {
   return (
     <main>
       <SiteNavbar />
-      <section className="mx-auto max-w-4xl px-4 py-10">
+      <section className="mx-auto max-w-6xl px-4 py-10">
         <div className="flex flex-col items-center gap-6 text-center">
-        <div className="relative h-28 w-28 overflow-hidden rounded-full bg-muted/40">
-          <Image
-            src={resolveStorageUrl(maestro.photo_url) || "/placeholder.svg"}
-            alt={maestro.display_name}
-            fill
-            sizes="112px"
-            className="object-cover"
-          />
+          <div className="relative h-28 w-28 overflow-hidden rounded-full bg-muted/40">
+            <Image
+              src={maestro.photo_url ?? "/placeholder.svg"}
+              alt={maestro.display_name}
+              fill
+              sizes="112px"
+              className="object-cover"
+            />
+          </div>
+          <div>
+            <h1 className="text-balance text-3xl font-bold tracking-tight md:text-4xl">{maestro.display_name}</h1>
+            <p className="mt-2 text-muted-foreground">
+              {(maestro.discipline ?? "")} {maestro.region ? `• ${maestro.region}` : ""}
+            </p>
+          </div>
+          <p className="max-w-2xl text-pretty leading-relaxed text-muted-foreground">{maestro.bio}</p>
         </div>
-        <div>
-          <h1 className="text-balance text-3xl font-bold tracking-tight md:text-4xl">{maestro.display_name}</h1>
-          <p className="mt-2 text-muted-foreground">
-            {(maestro.discipline ?? "")} {maestro.region ? `• ${maestro.region}` : ""}
-          </p>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pb-12">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 className="text-balance text-2xl font-semibold tracking-tight md:text-3xl">
+              Kelas oleh {maestro.display_name}
+            </h2>
+            <p className="mt-2 max-w-xl text-sm text-muted-foreground md:text-base">
+              Ikuti sesi pembelajaran yang dipandu langsung oleh maestro dan pelajari tradisi dari sumbernya.
+            </p>
+          </div>
         </div>
-        <p className="max-w-2xl text-pretty leading-relaxed text-muted-foreground">{maestro.bio}</p>
-        </div>
+
+        {classes.length > 0 ? (
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {classes.map((item) => (
+              <ClassCard
+                key={item.id}
+                id={item.id}
+                title={item.title}
+                category={item.category ?? "Umum"}
+                description={item.description ?? ""}
+                imageUrl={item.thumbnail_url ?? "/placeholder.svg"}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="mt-6 rounded-2xl border border-dashed bg-muted/20 p-8 text-center">
+            <p className="text-sm text-muted-foreground md:text-base">
+              {maestro.display_name} belum memiliki kelas aktif saat ini.
+            </p>
+            <Button asChild variant="secondary" className="mt-4">
+              <Link href="/kelas">Jelajahi kelas lainnya</Link>
+            </Button>
+          </div>
+        )}
       </section>
       <SiteFooter />
     </main>

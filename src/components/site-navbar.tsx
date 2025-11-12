@@ -1,17 +1,20 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { CircleUser, Menu, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useProfile } from "@/components/profile-provider"
+import { supabase } from "@/lib/supabase"
+import { toast } from "sonner"
 
 export function SiteNavbar() {
   const pathname = usePathname()
+  const router = useRouter()
   const navLinks = useMemo(
     () => [
     { href: "/", label: "Beranda" },
@@ -23,7 +26,8 @@ export function SiteNavbar() {
   )
 
   const [menuOpen, setMenuOpen] = useState(false)
-  const { authState, profile } = useProfile()
+  const { authState, profile, refreshProfile } = useProfile()
+  const [maestroLoading, setMaestroLoading] = useState(false)
 
   useEffect(() => {
     setMenuOpen(false)
@@ -76,6 +80,75 @@ export function SiteNavbar() {
     )
   })()
 
+  const handleBecomeMaestro = useCallback(async () => {
+    if (maestroLoading) return
+    setMaestroLoading(true)
+    try {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser()
+
+      if (error || !user) {
+        toast.info("Masuk terlebih dahulu untuk mengubah peran.")
+        router.push("/auth/sign-in?next=/profile/edit")
+        return
+      }
+
+      const currentRole = typeof user.user_metadata?.role === "string" ? (user.user_metadata.role as string) : null
+
+      if (currentRole !== "maestro") {
+        const fallbackName =
+          (typeof user.user_metadata?.display_name === "string" && user.user_metadata.display_name) ||
+          (typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name) ||
+          (user.email ? user.email.split("@")[0] : "Maestro Nusantara")
+
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({ role: "maestro" })
+          .eq("id", user.id)
+
+        if (profileError) throw profileError
+
+        const { error: maestroError } = await supabase.from("maestros").upsert({
+          id: user.id,
+          display_name: fallbackName,
+          photo_url:
+            typeof user.user_metadata?.avatar_url === "string" ? (user.user_metadata.avatar_url as string) : null,
+        })
+
+        if (maestroError) throw maestroError
+
+        const { error: authUpdateError } = await supabase.auth.updateUser({ data: { role: "maestro" } })
+        if (authUpdateError) throw authUpdateError
+
+        toast.success("Peran diperbarui menjadi maestro. Lengkapi detail profilmu.")
+      } else {
+        const { error: maestroEnsureError } = await supabase.from("maestros").upsert({
+          id: user.id,
+          display_name:
+            (typeof user.user_metadata?.display_name === "string" && user.user_metadata.display_name) ||
+            (typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name) ||
+            (user.email ? user.email.split("@")[0] : "Maestro Nusantara"),
+          photo_url:
+            typeof user.user_metadata?.avatar_url === "string" ? (user.user_metadata.avatar_url as string) : null,
+        })
+
+        if (maestroEnsureError) throw maestroEnsureError
+
+        toast.message("Kamu sudah terdaftar sebagai maestro. Perbarui profilmu.")
+      }
+
+      await refreshProfile()
+      router.push("/profile/edit")
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Tidak dapat mengubah peran maestro"
+      toast.error(message)
+    } finally {
+      setMaestroLoading(false)
+    }
+  }, [maestroLoading, refreshProfile, router])
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <nav className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
@@ -122,12 +195,14 @@ export function SiteNavbar() {
             <Link href="/kelas">Jelajahi Kelas</Link>
           </Button>
           <Button
-            asChild
+            type="button"
             size="sm"
             variant="outline"
             className="bg-transparent border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground"
+            onClick={handleBecomeMaestro}
+            disabled={maestroLoading}
           >
-            <Link href="/maestro">Jadi Maestro</Link>
+            {maestroLoading ? "Memproses…" : "Jadi Maestro"}
           </Button>
           {profileControl}
           <div className="w-[102px]">
@@ -177,11 +252,13 @@ export function SiteNavbar() {
               <Link href="/kelas">Jelajahi Kelas</Link>
             </Button>
             <Button
-              asChild
+              type="button"
               variant="outline"
               className="w-full border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground"
+              onClick={handleBecomeMaestro}
+              disabled={maestroLoading}
             >
-              <Link href="/maestro">Jadi Maestro</Link>
+              {maestroLoading ? "Memproses…" : "Jadi Maestro"}
             </Button>
             <div className="flex items-center justify-between gap-2">
               <span className="text-sm text-muted-foreground">Akun</span>

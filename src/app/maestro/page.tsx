@@ -1,12 +1,11 @@
-import Link from "next/link"
 import { Suspense } from "react"
 
 import { MaestroCard } from "@/components/maestro-card"
 import { SiteNavbar } from "@/components/site-navbar"
 import { SiteFooter } from "@/components/site-footer"
-import { Button } from "@/components/ui/button"
 import { getMaestros } from "@/lib/queries"
 import { Skeleton } from "@/components/ui/skeleton"
+import { CreateClassButton } from "@/components/create-class-button"
 
 export const revalidate = 60
 
@@ -64,9 +63,7 @@ export default function MaestroPage() {
               Kenali para maestro yang menjaga dan mengajarkan warisan budaya kita.
             </p>
           </div>
-          <Button asChild className="bg-primary text-primary-foreground hover:opacity-90">
-            <Link href="/maestro">Ajukan Diri sebagai Maestro</Link>
-          </Button>
+          <CreateClassButton className="bg-primary text-primary-foreground hover:opacity-90" />
         </div>
         <Suspense
           fallback={

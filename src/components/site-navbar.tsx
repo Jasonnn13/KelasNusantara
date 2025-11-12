@@ -97,19 +97,19 @@ export function SiteNavbar() {
 
       const currentRole = typeof user.user_metadata?.role === "string" ? (user.user_metadata.role as string) : null
 
+      const fallbackName =
+        (typeof user.user_metadata?.display_name === "string" && user.user_metadata.display_name) ||
+        (typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name) ||
+        (user.email ? user.email.split("@")[0] : "Maestro Nusantara")
+
+      const { error: profileRoleError } = await supabase
+        .from("profiles")
+        .update({ role: "maestro" })
+        .eq("id", user.id)
+
+      if (profileRoleError) throw profileRoleError
+
       if (currentRole !== "maestro") {
-        const fallbackName =
-          (typeof user.user_metadata?.display_name === "string" && user.user_metadata.display_name) ||
-          (typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name) ||
-          (user.email ? user.email.split("@")[0] : "Maestro Nusantara")
-
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update({ role: "maestro" })
-          .eq("id", user.id)
-
-        if (profileError) throw profileError
-
         const { error: maestroError } = await supabase.from("maestros").upsert({
           id: user.id,
           display_name: fallbackName,
@@ -126,15 +126,15 @@ export function SiteNavbar() {
       } else {
         const { error: maestroEnsureError } = await supabase.from("maestros").upsert({
           id: user.id,
-          display_name:
-            (typeof user.user_metadata?.display_name === "string" && user.user_metadata.display_name) ||
-            (typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name) ||
-            (user.email ? user.email.split("@")[0] : "Maestro Nusantara"),
+          display_name: fallbackName,
           photo_url:
             typeof user.user_metadata?.avatar_url === "string" ? (user.user_metadata.avatar_url as string) : null,
         })
 
         if (maestroEnsureError) throw maestroEnsureError
+
+        const { error: authEnsureError } = await supabase.auth.updateUser({ data: { role: "maestro" } })
+        if (authEnsureError) throw authEnsureError
 
         toast.message("Kamu sudah terdaftar sebagai maestro. Perbarui profilmu.")
       }

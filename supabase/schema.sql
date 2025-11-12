@@ -23,10 +23,17 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text,
   avatar_url text,
+  bio text,
+  region text,
+  discipline text,
   role public.user_role not null default 'student',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table if exists public.profiles add column if not exists bio text;
+alter table if exists public.profiles add column if not exists region text;
+alter table if exists public.profiles add column if not exists discipline text;
 
 -- Maestro-specific metadata (optional slice of profile)
 create table if not exists public.maestros (
@@ -200,9 +207,9 @@ select p.id,
        p.avatar_url,
        p.role,
        m.display_name,
-       m.region,
-       m.discipline,
-       m.bio,
+  coalesce(m.region, p.region) as region,
+  coalesce(m.discipline, p.discipline) as discipline,
+  coalesce(m.bio, p.bio) as bio,
        coalesce(e.enrollments_count, 0) as enrollments_count,
        coalesce(f.follows_count, 0) as follows_count,
        p.created_at

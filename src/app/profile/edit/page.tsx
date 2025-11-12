@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
 
-type Role = "student" | "maestro" | "admin"
+type Role = "student" | "maestro" 
 
 type ViewState =
 	| { status: "loading" }
@@ -157,18 +157,28 @@ export default function EditProfilePage() {
 		setIsSaving(true)
 		const userId = userIdRef.current
 
-		const profilePayload = {
-			full_name: formValues.fullName.trim() || null,
-			avatar_url: formValues.avatarUrl.trim() || null,
-		}
+			const normalizedFullName = formValues.fullName.trim() || null
+			const normalizedAvatar = formValues.avatarUrl.trim() || null
+			const normalizedBio = formValues.bio.trim() || null
+			const normalizedRegion = formValues.region.trim() || null
+			const normalizedDiscipline = formValues.discipline.trim() || null
+			const normalizedDisplayName = formValues.displayName.trim() || null
+
+				const profilePayload = {
+					full_name: normalizedFullName,
+					avatar_url: normalizedAvatar,
+		        	bio: normalizedBio,
+		        	region: role === "maestro" ? normalizedRegion : null,
+		        	discipline: role === "maestro" ? normalizedDiscipline : null,
+				}
 
 		const maestroPayload = {
 			id: userId,
-			display_name: formValues.displayName.trim() || null,
-			region: formValues.region.trim() || null,
-			discipline: formValues.discipline.trim() || null,
-			bio: formValues.bio.trim() || null,
-			photo_url: formValues.avatarUrl.trim() || null,
+					display_name: normalizedDisplayName,
+					region: normalizedRegion,
+					discipline: normalizedDiscipline,
+					bio: normalizedBio,
+					photo_url: normalizedAvatar,
 		}
 
 		try {
@@ -186,10 +196,10 @@ export default function EditProfilePage() {
 				data: {
 					full_name: profilePayload.full_name,
 					avatar_url: profilePayload.avatar_url,
-					display_name: maestroPayload.display_name,
-					region: maestroPayload.region,
-					discipline: maestroPayload.discipline,
-					bio: maestroPayload.bio,
+					display_name: normalizedDisplayName,
+					region: profilePayload.region,
+					discipline: profilePayload.discipline,
+					bio: profilePayload.bio,
 					role,
 				},
 			})

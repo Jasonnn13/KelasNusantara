@@ -396,9 +396,18 @@ function ProfileOverviewCard({
               </CardDescription>
             </div>
           </div>
-          <Button asChild variant="outline" className="rounded-full border-2 px-5 py-2 text-sm font-semibold">
-            <Link href="/profile/edit">Edit Profil</Link>
-          </Button>
+          <div className="flex flex-col gap-2 md:flex-row md:items-center">
+            <Button asChild variant="outline" className="rounded-full border-2 px-5 py-2 text-sm font-semibold">
+              <Link href="/profile/edit">Edit Profil</Link>
+            </Button>
+            <Button
+              asChild
+              variant="ghost"
+              className="rounded-full px-5 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
+            >
+              <Link href="/auth/sign-out?next=/">Keluar</Link>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="grid gap-6 md:grid-cols-[1.4fr_1fr]">
           <div className="rounded-2xl border bg-card/70 p-6 shadow-sm">

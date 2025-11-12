@@ -15,6 +15,7 @@ export default function SignInPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [resetLoading, setResetLoading] = useState(false)
   const router = useRouter()
   const search = useSearchParams()
 
@@ -54,6 +55,26 @@ export default function SignInPage() {
     }
   }
 
+  async function handleResetPassword() {
+    if (!email) {
+      toast.error("Masukkan email terlebih dahulu")
+      return
+    }
+    setResetLoading(true)
+    try {
+      const origin = typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL
+      const redirectTo = origin ? `${origin.replace(/\/$/, "")}/auth/update-password` : undefined
+      const { error } = await supabase.auth.resetPasswordForEmail(email, redirectTo ? { redirectTo } : undefined)
+      if (error) throw error
+      toast.success("Cek email untuk tautan pemulihan kata sandi")
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Tidak dapat mengirim tautan reset"
+      toast.error(message)
+    } finally {
+      setResetLoading(false)
+    }
+  }
+
   return (
     <main>
       <SiteNavbar />
@@ -78,9 +99,18 @@ export default function SignInPage() {
             required
             className="w-full rounded-md border px-3 py-2"
           />
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button type="submit" disabled={loading} className="bg-primary text-primary-foreground hover:opacity-90">
               {loading ? "Memproses…" : "Masuk"}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleResetPassword}
+              disabled={loading || resetLoading}
+              className="text-sm"
+            >
+              {resetLoading ? "Mengirim tautan…" : "Lupa kata sandi?"}
             </Button>
             <Link href={{ pathname: "/auth/register", query: { next } }} className="ml-auto self-center text-sm underline">
               Belum punya akun? Daftar

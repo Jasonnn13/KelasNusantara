@@ -196,10 +196,6 @@ export default function EditProfilePage() {
 				data: {
 					full_name: profilePayload.full_name,
 					avatar_url: profilePayload.avatar_url,
-					display_name: normalizedDisplayName,
-					region: profilePayload.region,
-					discipline: profilePayload.discipline,
-					bio: profilePayload.bio,
 					role,
 				},
 			})
